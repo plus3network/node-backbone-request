@@ -55,6 +55,13 @@ backboneRequest.sync = function(method, model, options) {
     if (err) {
       return options.error(err);
     }
+
+    if (result.statusCode > 399) {
+      var message = params.url + ' returned ' + result.statusCode || body.message;
+      err = new Error(message);
+      return options.error(err);
+    }
+
     return options.success(body);
   });
 
