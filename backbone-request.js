@@ -51,7 +51,18 @@ backboneRequest.sync = function(method, model, options) {
 
   _.extend(params, options);
 
-  request({ url: params.url, json: true, method: params.type, headers: params.headers }, function (err, result, body) {
+  var requestParams = {
+    url: params.url,
+    json: true,
+    method: params.type,
+    headers: params.headers
+  };
+
+  if (params.data) {
+    requestParams.json = params.data;
+  }
+  
+  request(requestParams, function (err, result, body) {
     if (err) {
       return options.error(err);
     }
