@@ -1,7 +1,9 @@
+
 var backboneRequest = exports,
     Backbone = require('backbone'),
     _ = require('underscore'),
     request = require('request');
+    querystring = require('querystring');
 
 //
 // Sync engine modeled after default backbone.js ajax syncing engine
@@ -25,7 +27,7 @@ backboneRequest.sync = function(method, model, options) {
   // Ensure that we have the appropriate request data.
   if (!options.data && model && (method == 'create' || method == 'update')) {
     params.contentType = 'application/json';
-    params.data = JSON.stringify(model.toJSON());
+    params.data = model.toJSON();
   }
 
   // For older servers, emulate JSON by encoding the request into an HTML-form.
@@ -53,13 +55,17 @@ backboneRequest.sync = function(method, model, options) {
 
   var requestParams = {
     url: params.url,
-    json: true,
     method: params.type,
+    json: true,
     headers: params.headers
   };
 
-  if (params.data) {
-    requestParams.json = params.data;
+  if (requestParams.method === 'GET' && params.data) {
+    requestParams.url += '?'+querystring.stringify(params.data);
+  } else if (~['POST','PUT'].indexOf(requestParams.method) && params.data) {
+    delete requestParams.json;
+    requestParams.body = JSON.stringify(params.data);
+    requestParams.headers['content-type'] = 'application/json';
   }
   
   request(requestParams, function (err, result, body) {
@@ -96,3 +102,4 @@ var getValue = function(object, prop) {
 var urlError = function() {
   throw new Error('A "url" property or function must be specified');
 };
+;
