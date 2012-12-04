@@ -1,4 +1,3 @@
-
 var backboneRequest = exports,
     Backbone = require('backbone'),
     _ = require('underscore'),
@@ -26,13 +25,13 @@ backboneRequest.sync = function(method, model, options) {
 
   // Ensure that we have the appropriate request data.
   if (!options.data && model && (method == 'create' || method == 'update')) {
-    params.contentType = 'application/json';
+    params.headers['content-type'] = 'application/json';
     params.data = model.toJSON();
   }
 
   // For older servers, emulate JSON by encoding the request into an HTML-form.
   if (Backbone.emulateJSON) {
-    params.contentType = 'application/x-www-form-urlencoded';
+    params.headers['content-type'] = 'application/x-www-form-urlencoded';
     params.data = params.data ? {model: params.data} : {};
   }
 
@@ -64,8 +63,7 @@ backboneRequest.sync = function(method, model, options) {
     requestParams.url += '?'+querystring.stringify(params.data);
   } else if (~['POST','PUT'].indexOf(requestParams.method) && params.data) {
     delete requestParams.json;
-    requestParams.body = JSON.stringify(params.data);
-    requestParams.headers['content-type'] = 'application/json';
+    requestParams.json = params.data;
   }
   
   request(requestParams, function (err, result, body) {
